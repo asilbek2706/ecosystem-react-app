@@ -1,5 +1,5 @@
 import React, { type FormEvent, useState } from 'react';
-import { Box, TextField, Button, Typography, Link } from '@mui/material';
+import { Box, Button, Link, TextField, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import '../styles/auth/LoginPage.scss';
 
@@ -12,11 +12,13 @@ const LoginPage: React.FC = () => {
     const handleLogin = (e: FormEvent) => {
         e.preventDefault();
 
-        if (username === 'user123') {
+        // Backend kelguncha test mantiqi
+        if (username === 'fake12') {
             setIsActive(false);
         } else {
             setIsActive(true);
             console.log('Login:', { username, password });
+            // Bu yerda muvaffaqiyatli bo'lsa navigatsiya bo'ladi
         }
     };
 
@@ -24,33 +26,40 @@ const LoginPage: React.FC = () => {
         <div className="login-container">
             <div className="login-card">
                 <div className="row g-0 h-100">
-                    {/* Chap taraf: Rasm */}
+                    {/* Chap taraf: Branding/Rasm */}
                     <div className="col-md-6 image-section">
                         <img src="/images/coderImage.png" alt="Ecosystem" />
+                        {/* Kerak bo'lsa bu yerga "Ecosystem by CoderBoys" kabi matn qo'shish mumkin */}
                     </div>
 
+                    {/* O'ng taraf: Forma */}
                     <div className="col-md-6 form-section">
                         <Typography variant="h4" className="form-title">
-                            Log In
+                            Login
                         </Typography>
 
-                        {/* Inactive xabari - Faqat aktiv bo'lmasa chiqadi */}
+                        {/* Inactive xabari */}
                         {!isActive && (
-                            <Typography
-                                color="error"
-                                variant="body2"
+                            <Box
+                                className="error-message"
                                 sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
                                     mb: 2,
-                                    fontWeight: 'bold',
-                                    textAlign: 'center',
                                 }}
                             >
                                 <i className="bi bi-exclamation-circle me-2"></i>
-                                Siz active emassiz!
-                            </Typography>
+                                <Typography
+                                    variant="body2"
+                                    sx={{ fontWeight: '600' }}
+                                >
+                                    Siz active emassiz!
+                                </Typography>
+                            </Box>
                         )}
 
-                        <form onSubmit={handleLogin}>
+                        <form onSubmit={handleLogin} autoComplete="off">
                             <Box
                                 sx={{
                                     display: 'flex',
@@ -66,12 +75,10 @@ const LoginPage: React.FC = () => {
                                     onChange={(e) =>
                                         setUsername(e.target.value)
                                     }
+                                    required
                                     InputProps={{
                                         startAdornment: (
                                             <i className="bi bi-person me-2 text-secondary"></i>
-                                        ),
-                                        endAdornment: (
-                                            <i className="bi bi-file-text text-light"></i>
                                         ),
                                     }}
                                 />
@@ -85,56 +92,68 @@ const LoginPage: React.FC = () => {
                                     onChange={(e) =>
                                         setPassword(e.target.value)
                                     }
+                                    required
                                     InputProps={{
                                         startAdornment: (
                                             <i className="bi bi-lock me-2 text-secondary"></i>
                                         ),
-                                        endAdornment: (
-                                            <i className="bi bi-file-lock text-light"></i>
-                                        ),
                                     }}
                                 />
 
-                                {/* Linklar qismi: Remember me o'rniga faqat aktivatsiya yoki forgot password */}
-                                <div className="d-flex justify-content-end align-items-center">
-                                    <div className="d-flex gap-2">
-                                        {!isActive ? (
-                                            <Link
-                                                component="button"
-                                                type="button"
-                                                onClick={() =>
-                                                    navigate('/activate')
-                                                }
-                                                className="special-link active-link d-flex justify-content-start"
-                                                sx={{
-                                                    color: '#ff5252',
-                                                    fontWeight: 'bold',
-                                                }}
-                                            >
-                                                Activate account
-                                            </Link>
-                                        ) : (
-                                            <Link
-                                                component="button"
-                                                type="button"
-                                                onClick={() =>
-                                                    navigate('/forgot-password')
-                                                }
-                                                className="special-link"
-                                            >
-                                                Forgot password?
-                                            </Link>
-                                        )}
-                                    </div>
-                                </div>
+                                {/* Dinamik Linklar */}
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        justifyContent: 'flex-end',
+                                        mt: -1,
+                                    }}
+                                >
+                                    {!isActive ? (
+                                        <Link
+                                            component="button"
+                                            type="button"
+                                            style={{
+                                                color: 'red',
+                                                fontWeight: '600',
+                                                textDecoration: 'underline',
+                                            }}
+                                            onClick={() =>
+                                                navigate('/activate')
+                                            }
+                                            className="special-link active-link"
+                                            sx={{
+                                                textDecoration: 'none',
+                                                fontSize: '0.8rem',
+                                            }}
+                                        >
+                                            Activate account
+                                        </Link>
+                                    ) : (
+                                        <Link
+                                            component="button"
+                                            type="button"
+                                            onClick={() =>
+                                                navigate('/forgot-password')
+                                            }
+                                            className="special-link forgot-link"
+                                            sx={{
+                                                textDecoration: 'underline',
+                                                fontSize: '0.8rem',
+                                            }}
+                                        >
+                                            Forgot password?
+                                        </Link>
+                                    )}
+                                </Box>
 
                                 <Button
                                     type="submit"
                                     variant="contained"
                                     className="login-btn"
                                     fullWidth
+                                    disabled={!username || !password}
                                 >
-                                    Log in
+                                    Login
                                 </Button>
                             </Box>
                         </form>
