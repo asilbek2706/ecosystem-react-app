@@ -1,6 +1,6 @@
-import React, { useState, type FormEvent } from 'react';
-import { Box, TextField, Button, Typography, Link } from '@mui/material';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { type FormEvent, useState } from 'react';
+import { Box, Button, Link, TextField, Typography } from '@mui/material';
+import { useLocation, useNavigate } from 'react-router-dom';
 import '../styles/auth/AuthAction.scss';
 
 const AuthAction: React.FC = () => {
