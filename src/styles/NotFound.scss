@@ -1,0 +1,32 @@
+.not-found-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    .error-code {
+        font-size: 8rem;
+        font-weight: 900;
+        margin: 0;
+        background: linear-gradient(45deg, #5d9cec, #a8e6cf);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: 10px;
+        line-height: 1;
+    }
+
+    .back-home-btn {
+        background-color: #5d9cec;
+        text-transform: none;
+        padding: 10px 25px;
+        font-weight: 600;
+        border-radius: 12px;
+        box-shadow: 0 10px 20px rgba(93, 156, 236, 0.2);
+
+        &:hover {
+            background-color: #4a89dc;
+            transform: translateY(-2px);
+            transition: 0.3s;
+        }
+    }
+}
