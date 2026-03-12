@@ -1,9 +1,10 @@
 .auth-action-container {
-    min-height: 80vh; // Layout ichida bo'lgani uchun balandlikni mosladik
+    min-height: 80vh;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
+    padding: 20px;
 
     .auth-action-card {
         background: #ffffff;
@@ -13,19 +14,32 @@
         border-radius: 24px;
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05) !important;
         border: none;
+        transition: all 0.3s ease;
+
+        @media (max-width: 480px) {
+            padding: 35px 25px;
+            border-radius: 20px;
+        }
 
         .action-logo {
             width: 120px;
             margin-bottom: 20px;
             object-fit: contain;
+
+            @media (max-width: 480px) {
+                width: 100px;
+            }
         }
 
         h5 {
             color: #333;
             margin-bottom: 10px;
+
+            @media (max-width: 480px) {
+                font-size: 1.1rem;
+            }
         }
 
-        // Input ikonkalari uchun ranglar
         i {
             color: #5d9cec;
             font-size: 1.1rem;
@@ -34,12 +48,16 @@
         .action-btn {
             background-color: #5d9cec;
             padding: 12px;
+            width: 100%;
             text-transform: none;
             font-weight: 700;
             font-size: 1rem;
             border-radius: 10px;
             box-shadow: 0 8px 15px rgba(93, 156, 236, 0.2);
             margin-top: 10px;
+            border: none;
+            color: white;
+            cursor: pointer;
             transition: all 0.3s ease;
 
             &:hover {
@@ -47,17 +65,22 @@
                 transform: translateY(-1px);
                 box-shadow: 0 10px 20px rgba(93, 156, 236, 0.3);
             }
+
+            &:active {
+                transform: translateY(0);
+            }
         }
 
         .back-link {
             text-decoration: none !important;
             font-size: 0.85rem;
             color: #999;
-            margin-top: 15px;
+            margin-top: 20px;
             transition: color 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 5px;
 
             &:hover {
                 color: #5d9cec;
@@ -65,17 +88,20 @@
 
             i {
                 font-size: 0.9rem;
-                color: inherit; // Ikonka rangini linkka moslaydi
+                color: inherit;
             }
         }
     }
 }
 
-// MUI Inputlarni standard uslubga moslash
 :deep(.MuiInput-underline:before) {
     border-bottom: 1px solid #eee !important;
 }
 
 :deep(.MuiInput-underline:after) {
     border-bottom: 2px solid #5d9cec !important;
+}
+
+:deep(.MuiFormLabel-root.Mui-focused) {
+    color: #5d9cec !important;
 }
