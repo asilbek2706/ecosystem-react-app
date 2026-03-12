@@ -1,17 +1,17 @@
-import React from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import '../styles/NotFound.scss';
+import type { FC } from 'react';
 
-const NotFound: React.FC = () => {
+const NotFound: FC = () => {
     const navigate = useNavigate();
 
     return (
         <Box className="not-found-wrapper">
             <div className="error-content text-center">
-                <h1 className="error-code">404</h1>
+                <h1 className="error-code">4 0 4</h1>
 
-                <Typography variant="h5" fontWeight="600" className="mb-2">
+                <Typography variant="h5" fontWeight="800" className="mb-2">
                     Sahifa topilmadi!
                 </Typography>
 
