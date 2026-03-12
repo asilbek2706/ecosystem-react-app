@@ -1,0 +1,134 @@
+.login-container {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent; // Layoutdagi context fon ko'rinishi uchun
+
+    .login-card {
+        background: #fff;
+        width: 950px;
+        height: 550px;
+        border-radius: 24px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        display: flex; // Row klassi bilan uyg'unlik uchun
+
+        .image-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #ffffff;
+            padding: 40px;
+            border-right: 1px solid #f0f0f0; // Bo'linish chizig'i
+
+            img {
+                width: 90%;
+                max-height: 350px;
+                object-fit: contain;
+            }
+        }
+
+        .form-section {
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+
+            .form-title {
+                font-weight: 800;
+                margin-bottom: 10px; // Pastdagi xatolik xabariga joy qoldirish uchun
+                color: #333;
+                text-align: left;
+            }
+
+            .error-message {
+                color: #ff5252;
+                font-size: 0.85rem;
+                font-weight: 600;
+                margin-bottom: 20px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            // Linklar bloki (Remember me o'rniga)
+            .links-wrapper {
+                display: flex;
+                justify-content: flex-end; // O'ng tarafga tekislash
+                margin-top: -10px; // Inputlar orasidagi masofani qisqartirish
+                margin-bottom: 20px;
+
+                .special-link {
+                    font-size: 0.8rem;
+                    text-decoration: none !important;
+                    font-weight: 600;
+                    transition: all 0.3s ease;
+
+                    &:hover {
+                        text-decoration: underline !important;
+                    }
+
+                    // Active account linki uchun maxsus uslub
+                    &.active-link {
+                        color: #ff5252 !important;
+                        border: 1px solid rgba(255, 82, 82, 0.2);
+                        padding: 4px 12px;
+                        border-radius: 6px;
+                        background: rgba(255, 82, 82, 0.05);
+
+                        &:hover {
+                            background: #ff5252;
+                            color: #fff !important;
+                            text-decoration: none !important;
+                            box-shadow: 0 4px 10px rgba(255, 82, 82, 0.2);
+                        }
+                    }
+
+                    // Forgot password linki uchun
+                    &.forgot-link {
+                        color: #5d9cec;
+                        &:hover {
+                            color: #4a89dc;
+                        }
+                    }
+                }
+            }
+
+            .login-btn {
+                background-color: #5d9cec;
+                padding: 12px;
+                text-transform: none;
+                font-weight: 700;
+                font-size: 1rem;
+                border-radius: 10px;
+                box-shadow: 0 8px 15px rgba(93, 156, 236, 0.2);
+                transition: all 0.3s ease;
+
+                &:hover {
+                    background-color: #4a89dc;
+                    transform: translateY(-1px);
+                    box-shadow: 0 10px 20px rgba(93, 156, 236, 0.3);
+                }
+
+                &:active {
+                    transform: translateY(0);
+                }
+            }
+        }
+    }
+}
+
+// MUI Inputlarni bizning dizaynga moslashtirish (Standard variant uchun)
+:deep(.MuiInput-underline:before) {
+    border-bottom: 1px solid #e0e0e0 !important;
+}
+
+:deep(.MuiInput-underline:after) {
+    border-bottom: 2px solid #5d9cec !important;
+}
+
+:deep(.MuiFormLabel-root.Mui-focused) {
+    color: #5d9cec !important;
+}
