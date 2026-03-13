@@ -1,29 +1,31 @@
 import React, { type FormEvent, useState } from 'react';
-import { Box, Button, Link, TextField, Typography } from '@mui/material';
-import { useLocation, useNavigate } from 'react-router-dom';
+import {
+    Box,
+    TextField,
+    Button,
+    Typography,
+    Link,
+    InputAdornment,
+} from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import '../styles/auth/AuthAction.scss';
 
-const AuthAction: React.FC = () => {
-    const [step, setStep] = useState(1); // 1: Username, 2: OTP
+const ForgotPassword: React.FC = () => {
+    const [step, setStep] = useState(1);
     const [username, setUsername] = useState('');
     const [code, setCode] = useState('');
     const navigate = useNavigate();
-    const location = useLocation();
-
-    const isActivation = location.pathname.includes('activate');
 
     const handleSendCode = (e: FormEvent) => {
         e.preventDefault();
-        console.log(
-            `${isActivation ? 'Aktivatsiya' : 'Tiklash'} kodi yuborildi:`,
-            username
-        );
+        // Swagger: POST /api/auth/forgot-password-send
+        console.log('Tiklash kodi yuborildi:', username);
         setStep(2);
     };
 
-    const handleVerifyCode = (e: FormEvent) => {
+    const handleVerify = (e: FormEvent) => {
         e.preventDefault();
-        console.log('Kod tasdiqlandi:', code);
+        // Swagger: POST /api/auth/verify-reset-code
         navigate('/login');
     };
 
@@ -37,9 +39,7 @@ const AuthAction: React.FC = () => {
                         className="action-logo"
                     />
                     <Typography variant="h5" fontWeight="700">
-                        {isActivation
-                            ? 'Akkauntni faollashtirish'
-                            : 'Parolni tiklash'}
+                        Parolni tiklash
                     </Typography>
                     <Typography
                         variant="body2"
@@ -47,12 +47,11 @@ const AuthAction: React.FC = () => {
                         sx={{ mt: 1 }}
                     >
                         {step === 1
-                            ? 'Tizimdagi username-ni kiriting, biz emailga kod yuboramiz.'
-                            : 'Emailingizga yuborilgan 6 xonali kodni kiriting.'}
+                            ? 'Username kiriting, parolni tiklash kodini yuboramiz.'
+                            : 'Emailingizga kelgan maxfiy kodni kiriting.'}
                     </Typography>
                 </div>
-
-                <form onSubmit={step === 1 ? handleSendCode : handleVerifyCode}>
+                <form onSubmit={step === 1 ? handleSendCode : handleVerify}>
                     <Box
                         sx={{
                             display: 'flex',
@@ -70,7 +69,9 @@ const AuthAction: React.FC = () => {
                                 required
                                 InputProps={{
                                     startAdornment: (
-                                        <i className="bi bi-person me-2"></i>
+                                        <InputAdornment position="start">
+                                            <i className="bi bi-person text-secondary"></i>
+                                        </InputAdornment>
                                     ),
                                 }}
                             />
@@ -84,12 +85,13 @@ const AuthAction: React.FC = () => {
                                 required
                                 InputProps={{
                                     startAdornment: (
-                                        <i className="bi bi-shield-lock me-2"></i>
+                                        <InputAdornment position="start">
+                                            <i className="bi bi-key text-secondary"></i>
+                                        </InputAdornment>
                                     ),
                                 }}
                             />
                         )}
-
                         <Button
                             type="submit"
                             variant="contained"
@@ -97,13 +99,10 @@ const AuthAction: React.FC = () => {
                         >
                             {step === 1 ? 'Kod yuborish' : 'Tasdiqlash'}
                         </Button>
-
                         <Link
                             component="button"
                             type="button"
-                            onClick={() =>
-                                step === 2 ? setStep(1) : navigate('/login')
-                            }
+                            onClick={() => navigate('/login')}
                             className="back-link"
                         >
                             <i className="bi bi-arrow-left me-1"></i> Orqaga
@@ -116,4 +115,4 @@ const AuthAction: React.FC = () => {
     );
 };
 
-export default AuthAction;
+export default ForgotPassword;

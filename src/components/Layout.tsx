@@ -1,8 +1,8 @@
-import React from 'react';
 import { Outlet } from 'react-router-dom';
 import '../styles/Background.scss';
+import type { FC } from 'react';
 
-const Layout: React.FC = () => {
+const Layout: FC = () => {
     return (
         <div className="app-layout">
             <div className="background-overlay"></div>
