@@ -1,23 +1,25 @@
 import {
+    useEffect,
+    useState,
     type ChangeEvent,
     type FC,
     type FormEvent,
-    useEffect,
-    useState,
 } from 'react';
+import '../styles/auth/LoginPage.scss';
+import { useNavigate } from 'react-router-dom';
+import { AuthService } from '../services/auth.service';
+import type { AxiosError } from 'axios';
 import {
     Alert,
     Box,
     Button,
-    CircularProgress,
     Link,
+    CircularProgress,
     TextField,
     Typography,
+    InputAdornment,
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import { AxiosError } from 'axios';
-import { AuthService } from '../services/auth.service';
-import '../styles/auth/LoginPage.scss';
+import WelcomeLoader from '../components/WelcomeLoader';
 
 interface ApiErrorResponse {
     detail?: string | string[];
@@ -30,6 +32,8 @@ const LoginPage: FC = () => {
     const [isActive, setIsActive] = useState<boolean>(true);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const [isSuccess, setIsSuccess] = useState<boolean>(false);
+    const [fullName, setFullName] = useState<string>('');
 
     const navigate = useNavigate();
 
@@ -56,9 +60,16 @@ const LoginPage: FC = () => {
                 );
 
                 const profileRes = await AuthService.getProfile();
-                AuthService.saveProfile(profileRes.data);
+                const userData = profileRes.data.data;
 
-                navigate('/dashboard');
+                AuthService.saveProfile(userData);
+
+                setFullName(`${userData.first_name} ${userData.last_name}`);
+                setIsSuccess(true);
+
+                setTimeout(() => {
+                    navigate('/dashboard');
+                }, 2000);
             }
         } catch (err) {
             const axiosError = err as AxiosError<ApiErrorResponse>;
@@ -91,10 +102,13 @@ const LoginPage: FC = () => {
             } else {
                 setError('Tizimga kirishda xatolik yuz berdi!');
             }
-        } finally {
             setLoading(false);
         }
     };
+
+    if (isSuccess) {
+        return <WelcomeLoader name={fullName} />;
+    }
 
     return (
         <div className="login-container">
@@ -146,7 +160,9 @@ const LoginPage: FC = () => {
                                     disabled={loading}
                                     InputProps={{
                                         startAdornment: (
-                                            <i className="bi bi-person me-2 text-primary"></i>
+                                            <InputAdornment position="start">
+                                                <i className="bi bi-person me-2 text-primary"></i>
+                                            </InputAdornment>
                                         ),
                                     }}
                                 />
@@ -163,7 +179,9 @@ const LoginPage: FC = () => {
                                     disabled={loading}
                                     InputProps={{
                                         startAdornment: (
-                                            <i className="bi bi-lock me-2 text-primary"></i>
+                                            <InputAdornment position="start">
+                                                <i className="bi bi-lock me-2 text-primary"></i>
+                                            </InputAdornment>
                                         ),
                                     }}
                                 />
