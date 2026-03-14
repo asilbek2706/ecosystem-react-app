@@ -87,7 +87,7 @@ const ActivateAccount: FC = () => {
             <div className="auth-action-card shadow-lg">
                 <div className="text-center mb-4">
                     <img
-                        src="/images/coderImage.png"
+                        src="/images/logotip.png"
                         alt="Logo"
                         style={{ maxWidth: '100px' }}
                     />
