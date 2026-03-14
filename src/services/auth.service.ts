@@ -11,6 +11,12 @@ interface TokenResponse {
     refresh: string;
 }
 
+interface ResetPasswordData {
+    otp: string;
+    new_password: string;
+    confirm_password: string;
+}
+
 export const AuthService = {
     login: (data: LoginData) => api.post<TokenResponse>('/auth/login/', data),
 
@@ -18,6 +24,12 @@ export const AuthService = {
         api.post('/auth/send-verify-otp/', { username }),
 
     verifyOTP: (otp: string) => api.post('/auth/verify-otp/', { otp }),
+
+    forgotPassword: (username: string) =>
+        api.post('/auth/forgot-password/', { username }),
+
+    verifyForgotOtp: (data: ResetPasswordData) =>
+        api.post('/auth/verify-forgot-otp/', data),
 
     getProfile: () => api.get<{ data: IUserProfile }>('/auth/profile/'),
 
