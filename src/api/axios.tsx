@@ -7,9 +7,13 @@ const api = axios.create({
 
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem('accessToken');
-    const isPublic = ['/login/', '/send-verify-otp/', '/verify-otp/'].some(
-        (url) => config.url?.includes(url)
-    );
+    const isPublic = [
+        '/login/',
+        '/send-verify-otp/',
+        '/verify-otp/',
+        '/auth/forgot-password/',
+        '/auth/verify-forgot-otp/',
+    ].some((url) => config.url?.includes(url));
 
     if (token && !isPublic) {
         config.headers.Authorization = `Bearer ${token}`;
