@@ -7,7 +7,7 @@ import {
 } from 'react';
 import '../styles/auth/LoginPage.scss';
 import { useNavigate } from 'react-router-dom';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '../services/auth.service.ts';
 import type { AxiosError } from 'axios';
 import {
     Alert,
@@ -19,7 +19,7 @@ import {
     Typography,
     InputAdornment,
 } from '@mui/material';
-import WelcomeLoader from '../components/WelcomeLoader';
+import WelcomeLoader from '../components/WelcomeLoader.tsx';
 
 interface ApiErrorResponse {
     detail?: string | string[];
