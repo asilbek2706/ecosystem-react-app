@@ -7,9 +7,11 @@ import {
     Menu,
     MenuItem,
     Typography,
+    Box,
+    CircularProgress,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { AuthService } from '../../services/auth.service.ts';
+import { LogoutService } from '../../services/logout.service.ts'; // Alohida service
 import type { IUserProfile } from '../../types/auth.types.ts';
 import '../../styles/dashboard/UserMenu.scss';
 
@@ -20,6 +22,7 @@ interface UserMenuProps {
 const UserMenu: FC<UserMenuProps> = memo(({ user }) => {
     const navigate = useNavigate();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
 
     const handleOpenMenu = (event: MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -34,10 +37,20 @@ const UserMenu: FC<UserMenuProps> = memo(({ user }) => {
         navigate('/dashboard/profile');
     };
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         handleCloseMenu();
-        AuthService.logout();
-        navigate('/login');
+        setIsLoggingOut(true); // Yuklanish holatini yoqish
+
+        try {
+            // Server-side logoutni chaqiramiz
+            await LogoutService.handleLogout();
+        } catch (error) {
+            console.error('Logout process error:', error);
+        } finally {
+            setIsLoggingOut(false);
+            // Har qanday holatda foydalanuvchini login sahifasiga yo'naltiramiz
+            navigate('/login', { replace: true });
+        }
     };
 
     const getAvatarImage = () => {
@@ -49,7 +62,15 @@ const UserMenu: FC<UserMenuProps> = memo(({ user }) => {
         if (user?.member_departments && user.member_departments.length > 0) {
             return user.member_departments[0].name;
         }
-        return user?.role === 'dev' ? 'Frontend Developer' : user?.role;
+
+        // Rollarni chiroyliroq ko'rsatish mantiqi
+        const roles: Record<string, string> = {
+            dev: 'Dasturchi',
+            superadmin: 'Admin',
+            manager: 'Manager',
+        };
+
+        return roles[user?.role || ''] || user?.role || 'Foydalanuvchi';
     };
 
     return (
@@ -63,7 +84,7 @@ const UserMenu: FC<UserMenuProps> = memo(({ user }) => {
             <div
                 className="user-account"
                 onClick={handleOpenMenu}
-                style={{ cursor: 'pointer' }}
+                style={{ cursor: isLoggingOut ? 'not-allowed' : 'pointer' }}
             >
                 <div className="user-info">
                     <Typography className="name">
@@ -75,13 +96,26 @@ const UserMenu: FC<UserMenuProps> = memo(({ user }) => {
                         {getDepartmentName()}
                     </Typography>
                 </div>
-                <Avatar
-                    className="user-avatar"
-                    sx={{ bgcolor: 'primary.main' }}
-                    src={getAvatarImage()}
-                >
-                    {user?.first_name?.charAt(0) || 'U'}
-                </Avatar>
+                <Box sx={{ position: 'relative' }}>
+                    <Avatar
+                        className="user-avatar"
+                        sx={{ bgcolor: 'primary.main' }}
+                        src={getAvatarImage()}
+                    >
+                        {user?.first_name?.charAt(0) || 'U'}
+                    </Avatar>
+                    {isLoggingOut && (
+                        <CircularProgress
+                            size={40}
+                            sx={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                zIndex: 1,
+                            }}
+                        />
+                    )}
+                </Box>
             </div>
 
             <Menu
@@ -94,7 +128,7 @@ const UserMenu: FC<UserMenuProps> = memo(({ user }) => {
                 PaperProps={{
                     sx: {
                         borderRadius: '12px',
-                        minWidth: '180px',
+                        minWidth: '200px',
                         boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
                     },
                 }}
@@ -105,8 +139,25 @@ const UserMenu: FC<UserMenuProps> = memo(({ user }) => {
                     </ListItemIcon>
                     Profil
                 </MenuItem>
+
+                <MenuItem onClick={handleCloseMenu} sx={{ py: 1.2 }}>
+                    <ListItemIcon>
+                        <i className="bi bi-gear"></i>
+                    </ListItemIcon>
+                    Sozlamalar
+                </MenuItem>
+
+                <div
+                    style={{
+                        height: '1px',
+                        backgroundColor: '#eee',
+                        margin: '8px 0',
+                    }}
+                />
+
                 <MenuItem
                     onClick={handleLogout}
+                    disabled={isLoggingOut}
                     sx={{ color: '#d32f2f', py: 1.2 }}
                 >
                     <ListItemIcon>
