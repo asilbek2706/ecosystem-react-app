@@ -20,6 +20,8 @@ body {
     height: 100vh;
     width: 100vw;
     background: #f4f8ff;
+    position: relative;
+    overflow: hidden;
 }
 
 .sidebar {
@@ -32,6 +34,8 @@ body {
     flex-direction: column;
     padding: 20px;
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
 }
 
 .sidebar-header {
@@ -75,7 +79,8 @@ body {
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.3s ease;
-    position: relative;
+    text-align: left;
+    width: 100%;
 
     i {
         font-size: 18px;
@@ -109,6 +114,7 @@ body {
     display: flex;
     flex-direction: column;
     height: 100vh;
+    width: 100%;
 }
 
 .navbar-custom {
@@ -120,6 +126,16 @@ body {
     justify-content: space-between;
     padding: 0 30px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.burger-menu {
+    display: none;
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    color: #0f4c81;
+    cursor: pointer;
+    margin-right: 15px;
 }
 
 .brand-name {
@@ -134,10 +150,54 @@ body {
     overflow-y: auto;
 }
 
-.empty-state {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #6c7a89;
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+}
+
+@media (max-width: 992px) {
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        transform: translateX(-100%);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .sidebar-overlay.visible {
+        display: block;
+    }
+
+    .burger-menu {
+        display: block;
+    }
+
+    .navbar-custom {
+        padding: 0 20px;
+    }
+
+    .content-body {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 576px) {
+    .sidebar {
+        width: 100%;
+        max-width: 280px;
+    }
+
+    .brand-name {
+        font-size: 18px;
+    }
 }
