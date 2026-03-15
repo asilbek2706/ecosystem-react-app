@@ -76,7 +76,7 @@ const UserMenu: FC<UserMenuProps> = memo(({ user }) => {
     return (
         <div className="navbar-actions">
             <IconButton className="action-btn">
-                <Badge badgeContent={4} color="error">
+                <Badge color="error">
                     <i className="bi bi-bell"></i>
                 </Badge>
             </IconButton>
@@ -138,13 +138,6 @@ const UserMenu: FC<UserMenuProps> = memo(({ user }) => {
                         <i className="bi bi-person"></i>
                     </ListItemIcon>
                     Profil
-                </MenuItem>
-
-                <MenuItem onClick={handleCloseMenu} sx={{ py: 1.2 }}>
-                    <ListItemIcon>
-                        <i className="bi bi-gear"></i>
-                    </ListItemIcon>
-                    Sozlamalar
                 </MenuItem>
 
                 <div

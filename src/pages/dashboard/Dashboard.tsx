@@ -4,7 +4,19 @@ import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import '../../styles/dashboard/Dashboard.scss';
 import { AuthService } from '../../services/auth.service.ts';
 import type { IUserProfile } from '../../types/auth.types.ts';
-import UserMenu from './UserMenu.tsx';
+import UserMenu from '../profile/UserMenu.tsx';
+
+interface NavItemProps {
+    active: boolean;
+    onClick: () => void;
+    icon: string;
+    label: string;
+}
+
+export interface DashboardContextType {
+    user: IUserProfile | null;
+    refreshProfile: () => Promise<void>;
+}
 
 const Dashboard: FC = () => {
     const navigate = useNavigate();
@@ -13,9 +25,11 @@ const Dashboard: FC = () => {
     const [user, setUser] = useState<IUserProfile | null>(() => {
         return AuthService.getSavedProfile();
     });
-    const [loading, setLoading] = useState<boolean>(false);
 
-    const refreshProfile = useCallback(async () => {
+    const [loading, setLoading] = useState<boolean>(true);
+    const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+
+    const refreshProfile = useCallback(async (): Promise<void> => {
         try {
             const response = await AuthService.getProfile();
             const latestData = response.data.data;
@@ -25,7 +39,7 @@ const Dashboard: FC = () => {
         } catch (err) {
             console.error('Profilni yangilashda xatolik:', err);
             if (!AuthService.isAuthenticated()) {
-                navigate('/login');
+                navigate('/login', { replace: true });
             }
         } finally {
             setLoading(false);
@@ -41,13 +55,16 @@ const Dashboard: FC = () => {
     }, [navigate, refreshProfile]);
 
     const handleNavClick = useCallback(
-        (path: string) => {
+        (path: string): void => {
             navigate(path);
+            setIsMenuOpen(false);
         },
         [navigate]
     );
 
-    const isActive = (path: string) => location.pathname === path;
+    const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+    const isActive = (path: string): boolean => location.pathname === path;
 
     if (loading && !user) {
         return (
@@ -66,7 +83,12 @@ const Dashboard: FC = () => {
 
     return (
         <Box className="dashboard-container">
-            <aside className="sidebar">
+            <div
+                className={`sidebar-overlay ${isMenuOpen ? 'visible' : ''}`}
+                onClick={() => setIsMenuOpen(false)}
+            />
+
+            <aside className={`sidebar ${isMenuOpen ? 'open' : ''}`}>
                 <div
                     className="sidebar-header"
                     onClick={() => handleNavClick('/dashboard')}
@@ -83,65 +105,82 @@ const Dashboard: FC = () => {
                 </div>
 
                 <nav className="sidebar-nav">
-                    <button
-                        className={`nav-item ${isActive('/dashboard') ? 'active' : ''}`}
+                    <NavItem
+                        active={isActive('/dashboard')}
                         onClick={() => handleNavClick('/dashboard')}
-                    >
-                        <i className="bi bi-grid-1x2-fill"></i>
-                        <p>Asosiy Panel</p>
-                    </button>
-
-                    <button
-                        className={`nav-item ${isActive('/dashboard/schedule') ? 'active' : ''}`}
+                        icon="bi-grid-1x2-fill"
+                        label="Asosiy Panel"
+                    />
+                    <NavItem
+                        active={isActive('/dashboard/schedule')}
                         onClick={() => handleNavClick('/dashboard/schedule')}
-                    >
-                        <i className="bi bi-calendar4-event"></i>
-                        <p>Dars jadvali</p>
-                    </button>
-
-                    <button
-                        className={`nav-item ${isActive('/dashboard/projects') ? 'active' : ''}`}
+                        icon="bi-calendar4-event"
+                        label="Dars jadvali"
+                    />
+                    <NavItem
+                        active={isActive('/dashboard/projects')}
                         onClick={() => handleNavClick('/dashboard/projects')}
-                    >
-                        <i className="bi bi-journal-code"></i>
-                        <p>Loyihalar</p>
-                    </button>
-
-                    <button
-                        className={`nav-item ${isActive('/dashboard/messages') ? 'active' : ''}`}
+                        icon="bi-journal-code"
+                        label="Loyihalar"
+                    />
+                    <NavItem
+                        active={isActive('/dashboard/messages')}
                         onClick={() => handleNavClick('/dashboard/messages')}
-                    >
-                        <i className="bi bi-chat-left-text"></i>
-                        <p>Xabarlar</p>
-                    </button>
+                        icon="bi-chat-left-text"
+                        label="Xabarlar"
+                    />
 
-                    <div className="nav-divider"></div>
+                    <div className="nav-divider" />
 
-                    <button
-                        className={`nav-item ${isActive('/dashboard/settings') ? 'active' : ''}`}
+                    <NavItem
+                        active={isActive('/dashboard/settings')}
                         onClick={() => handleNavClick('/dashboard/settings')}
-                    >
-                        <i className="bi bi-gear"></i>
-                        <p>Sozlamalar</p>
-                    </button>
+                        icon="bi-gear"
+                        label="Sozlamalar"
+                    />
                 </nav>
             </aside>
 
             <Box className="main-wrapper">
                 <header className="navbar-custom">
-                    <Typography variant="h5" className="brand-name">
-                        Ecosystem
-                    </Typography>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <button className="burger-menu" onClick={toggleMenu}>
+                            <i
+                                className={`bi ${isMenuOpen ? 'bi-x' : 'bi-list'}`}
+                            ></i>
+                        </button>
+                        <Typography variant="h5" className="brand-name">
+                            Ecosystem
+                        </Typography>
+                    </div>
 
                     <UserMenu user={user} />
                 </header>
 
                 <main className="content-body">
-                    <Outlet context={{ user, refreshProfile }} />
+                    <Outlet
+                        context={
+                            {
+                                user,
+                                refreshProfile,
+                            } satisfies DashboardContextType
+                        }
+                    />
                 </main>
             </Box>
         </Box>
     );
 };
+
+const NavItem: FC<NavItemProps> = ({ active, onClick, icon, label }) => (
+    <button
+        type="button"
+        className={`nav-item ${active ? 'active' : ''}`}
+        onClick={onClick}
+    >
+        <i className={`bi ${icon}`}></i>
+        <p>{label}</p>
+    </button>
+);
 
 export default Dashboard;
