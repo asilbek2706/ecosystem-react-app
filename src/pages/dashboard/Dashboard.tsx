@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, type FC } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, CircularProgress } from '@mui/material';
 import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import '../../styles/dashboard/Dashboard.scss';
 import { AuthService } from '../../services/auth.service.ts';
@@ -10,15 +10,35 @@ const Dashboard: FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const [user] = useState<IUserProfile | null>(() => {
+    const [user, setUser] = useState<IUserProfile | null>(() => {
         return AuthService.getSavedProfile();
     });
+    const [loading, setLoading] = useState<boolean>(false);
+
+    const refreshProfile = useCallback(async () => {
+        try {
+            const response = await AuthService.getProfile();
+            const latestData = response.data.data;
+
+            AuthService.saveProfile(latestData);
+            setUser(latestData);
+        } catch (err) {
+            console.error('Profilni yangilashda xatolik:', err);
+            if (!AuthService.isAuthenticated()) {
+                navigate('/login');
+            }
+        } finally {
+            setLoading(false);
+        }
+    }, [navigate]);
 
     useEffect(() => {
-        if (!user) {
+        if (!AuthService.isAuthenticated()) {
             navigate('/login', { replace: true });
+        } else {
+            refreshProfile();
         }
-    }, [user, navigate]);
+    }, [navigate, refreshProfile]);
 
     const handleNavClick = useCallback(
         (path: string) => {
@@ -28,6 +48,21 @@ const Dashboard: FC = () => {
     );
 
     const isActive = (path: string) => location.pathname === path;
+
+    if (loading && !user) {
+        return (
+            <Box
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100vh',
+                }}
+            >
+                <CircularProgress />
+            </Box>
+        );
+    }
 
     return (
         <Box className="dashboard-container">
@@ -102,7 +137,7 @@ const Dashboard: FC = () => {
                 </header>
 
                 <main className="content-body">
-                    <Outlet context={{ user }} />
+                    <Outlet context={{ user, refreshProfile }} />
                 </main>
             </Box>
         </Box>
