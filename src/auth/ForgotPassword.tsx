@@ -6,11 +6,11 @@ import {
     Typography,
     Link,
     InputAdornment,
-    Alert,
     CircularProgress,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { AxiosError } from 'axios';
+import { toast } from 'sonner';
 import '../styles/auth/AuthAction.scss';
 import { AuthService } from '../services/auth.service';
 
@@ -27,57 +27,57 @@ const ForgotPassword: React.FC = () => {
     const [confirmPassword, setConfirmPassword] = useState<string>('');
 
     const [loading, setLoading] = useState<boolean>(false);
-    const [error, setError] = useState<string | null>(null);
 
     const navigate = useNavigate();
 
     const handleSendCode = async (e: FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        setError(null);
+
         try {
             await AuthService.forgotPassword(username);
+            toast.success('Tasdiqlash kodi yuborildi!');
             setStep(2);
         } catch (err) {
             const axiosError = err as AxiosError<BackendError>;
-            setError(
+            const errorMsg =
                 axiosError.response?.data?.detail ||
-                    axiosError.response?.data?.message ||
-                    'Username topilmadi yoki xatolik yuz berdi.'
-            );
+                axiosError.response?.data?.message ||
+                'Username topilmadi yoki xatolik yuz berdi.';
+            toast.error(errorMsg); // Xatolik xabari
         } finally {
             setLoading(false);
         }
     };
 
-    // 2-qadam: OTP + Yangi parollarni yuborish
     const handleVerifyAndReset = async (e: FormEvent) => {
         e.preventDefault();
 
         if (newPassword !== confirmPassword) {
-            setError('Parollar mos kelmadi!');
+            toast.error('Parollar mos kelmadi!');
             return;
         }
 
         setLoading(true);
-        setError(null);
         try {
             await AuthService.verifyForgotOtp({
                 otp: code,
                 new_password: newPassword,
                 confirm_password: confirmPassword,
             });
-            alert(
-                'Parol muvaffaqiyatli yangilandi! Endi yangi parol bilan login qilishingiz mumkin.'
-            );
-            navigate('/login');
+
+            toast.success('Parol muvaffaqiyatli yangilandi!');
+
+            setTimeout(() => {
+                navigate('/login');
+            }, 1500);
         } catch (err) {
             const axiosError = err as AxiosError<BackendError>;
-            setError(
+            const errorMsg =
                 axiosError.response?.data?.detail ||
-                    axiosError.response?.data?.message ||
-                    "Xatolik! Kod xato bo'lishi yoki parol talablarga javob bermasligi mumkin."
-            );
+                axiosError.response?.data?.message ||
+                "Xatolik! Kod xato bo'lishi yoki parol talablarga javob bermasligi mumkin.";
+            toast.error(errorMsg); // Xatolik xabari
         } finally {
             setLoading(false);
         }
@@ -106,11 +106,7 @@ const ForgotPassword: React.FC = () => {
                     </Typography>
                 </div>
 
-                {error && (
-                    <Alert severity="error" sx={{ mb: 2 }}>
-                        {error}
-                    </Alert>
-                )}
+                {/* MUI Alert olib tashlandi, chunki endi toast ishlatamiz */}
 
                 <form
                     onSubmit={
