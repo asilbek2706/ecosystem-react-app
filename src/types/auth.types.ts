@@ -19,3 +19,12 @@ export interface IUserProfile {
     github_username: string;
     member_departments: IDepartment[];
 }
+
+export interface IApiError {
+    response?: {
+        data?: {
+            message?: string;
+            errors?: Record<string, string[]>;
+        };
+    };
+}
