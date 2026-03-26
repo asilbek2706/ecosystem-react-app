@@ -156,7 +156,11 @@ const LoginPage: FC = () => {
                                     value={username}
                                     onChange={(
                                         e: ChangeEvent<HTMLInputElement>
-                                    ) => setUsername(e.target.value)}
+                                    ) =>
+                                        setUsername(
+                                            e.target.value.toUpperCase()
+                                        )
+                                    }
                                     disabled={loading}
                                     InputProps={{
                                         startAdornment: (
@@ -164,6 +168,7 @@ const LoginPage: FC = () => {
                                                 <i className="bi bi-person me-2 text-primary"></i>
                                             </InputAdornment>
                                         ),
+                                        style: { textTransform: 'uppercase' },
                                     }}
                                 />
 

@@ -5,6 +5,8 @@ export interface IDepartment {
 }
 
 export interface IUserProfile {
+    id: number | string;
+    avatar?: string;
     username: string;
     email: string;
     first_name: string;

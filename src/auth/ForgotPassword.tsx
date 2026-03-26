@@ -1,4 +1,4 @@
-import React, { type FormEvent, useState } from 'react';
+import React, { type ChangeEvent, type FormEvent, useState } from 'react';
 import {
     Box,
     TextField,
@@ -14,8 +14,11 @@ import { toast } from 'sonner';
 import '../styles/auth/AuthAction.scss';
 import { AuthService } from '../services/auth.service';
 
+/**
+ * Backenddan kelishi mumkin bo'lgan xatolik strukturasi
+ */
 interface BackendError {
-    detail?: string;
+    detail?: string | string[];
     message?: string;
 }
 
@@ -30,26 +33,41 @@ const ForgotPassword: React.FC = () => {
 
     const navigate = useNavigate();
 
+    /**
+     * Step 1: Username yuborish va kod olish
+     */
     const handleSendCode = async (e: FormEvent) => {
         e.preventDefault();
         setLoading(true);
 
         try {
-            await AuthService.forgotPassword(username);
+            // Username'ni trim va uppercase qilib yuboramiz
+            await AuthService.forgotPassword(username.trim().toUpperCase());
             toast.success('Tasdiqlash kodi yuborildi!');
             setStep(2);
         } catch (err) {
             const axiosError = err as AxiosError<BackendError>;
-            const errorMsg =
-                axiosError.response?.data?.detail ||
-                axiosError.response?.data?.message ||
-                'Username topilmadi yoki xatolik yuz berdi.';
-            toast.error(errorMsg); // Xatolik xabari
+            const errorData = axiosError.response?.data;
+
+            let errorMsg = 'Username topilmadi yoki xatolik yuz berdi.';
+
+            if (errorData?.message) {
+                errorMsg = errorData.message;
+            } else if (Array.isArray(errorData?.detail)) {
+                errorMsg = errorData.detail[0];
+            } else if (typeof errorData?.detail === 'string') {
+                errorMsg = errorData.detail;
+            }
+
+            toast.error(errorMsg);
         } finally {
             setLoading(false);
         }
     };
 
+    /**
+     * Step 2: Kodni tekshirish va parolni yangilash
+     */
     const handleVerifyAndReset = async (e: FormEvent) => {
         e.preventDefault();
 
@@ -61,7 +79,7 @@ const ForgotPassword: React.FC = () => {
         setLoading(true);
         try {
             await AuthService.verifyForgotOtp({
-                otp: code,
+                otp: code.trim(),
                 new_password: newPassword,
                 confirm_password: confirmPassword,
             });
@@ -73,11 +91,20 @@ const ForgotPassword: React.FC = () => {
             }, 1500);
         } catch (err) {
             const axiosError = err as AxiosError<BackendError>;
-            const errorMsg =
-                axiosError.response?.data?.detail ||
-                axiosError.response?.data?.message ||
+            const errorData = axiosError.response?.data;
+
+            let errorMsg =
                 "Xatolik! Kod xato bo'lishi yoki parol talablarga javob bermasligi mumkin.";
-            toast.error(errorMsg); // Xatolik xabari
+
+            if (errorData?.message) {
+                errorMsg = errorData.message;
+            } else if (Array.isArray(errorData?.detail)) {
+                errorMsg = errorData.detail[0];
+            } else if (typeof errorData?.detail === 'string') {
+                errorMsg = errorData.detail;
+            }
+
+            toast.error(errorMsg);
         } finally {
             setLoading(false);
         }
@@ -91,8 +118,14 @@ const ForgotPassword: React.FC = () => {
                         src="/images/logotip.png"
                         alt="Logo"
                         className="action-logo"
+                        style={{ maxWidth: '100px' }}
                     />
-                    <Typography variant="h5" fontWeight="700">
+                    <Typography
+                        variant="h5"
+                        fontWeight="700"
+                        color="primary"
+                        sx={{ mt: 2 }}
+                    >
                         Parolni tiklash
                     </Typography>
                     <Typography
@@ -106,12 +139,11 @@ const ForgotPassword: React.FC = () => {
                     </Typography>
                 </div>
 
-                {/* MUI Alert olib tashlandi, chunki endi toast ishlatamiz */}
-
                 <form
                     onSubmit={
                         step === 1 ? handleSendCode : handleVerifyAndReset
                     }
+                    noValidate
                 >
                     <Box
                         sx={{
@@ -126,7 +158,10 @@ const ForgotPassword: React.FC = () => {
                                 variant="standard"
                                 fullWidth
                                 value={username}
-                                onChange={(e) => setUsername(e.target.value)}
+                                // Avtomatik katta harfga o'tkazish
+                                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                    setUsername(e.target.value.toUpperCase())
+                                }
                                 required
                                 disabled={loading}
                                 InputProps={{
@@ -135,6 +170,7 @@ const ForgotPassword: React.FC = () => {
                                             <i className="bi bi-person text-secondary"></i>
                                         </InputAdornment>
                                     ),
+                                    style: { textTransform: 'uppercase' },
                                 }}
                             />
                         ) : (
@@ -144,8 +180,11 @@ const ForgotPassword: React.FC = () => {
                                     variant="standard"
                                     fullWidth
                                     value={code}
-                                    onChange={(e) => setCode(e.target.value)}
+                                    onChange={(
+                                        e: ChangeEvent<HTMLInputElement>
+                                    ) => setCode(e.target.value)}
                                     required
+                                    autoFocus
                                     disabled={loading}
                                     InputProps={{
                                         startAdornment: (
@@ -161,9 +200,9 @@ const ForgotPassword: React.FC = () => {
                                     variant="standard"
                                     fullWidth
                                     value={newPassword}
-                                    onChange={(e) =>
-                                        setNewPassword(e.target.value)
-                                    }
+                                    onChange={(
+                                        e: ChangeEvent<HTMLInputElement>
+                                    ) => setNewPassword(e.target.value)}
                                     required
                                     disabled={loading}
                                     InputProps={{
@@ -180,9 +219,9 @@ const ForgotPassword: React.FC = () => {
                                     variant="standard"
                                     fullWidth
                                     value={confirmPassword}
-                                    onChange={(e) =>
-                                        setConfirmPassword(e.target.value)
-                                    }
+                                    onChange={(
+                                        e: ChangeEvent<HTMLInputElement>
+                                    ) => setConfirmPassword(e.target.value)}
                                     required
                                     disabled={loading}
                                     InputProps={{
@@ -200,8 +239,18 @@ const ForgotPassword: React.FC = () => {
                             type="submit"
                             variant="contained"
                             className="action-btn"
-                            disabled={loading}
-                            sx={{ minHeight: '45px' }}
+                            disabled={
+                                loading ||
+                                (step === 1
+                                    ? !username.trim()
+                                    : !code.trim() || !newPassword)
+                            }
+                            sx={{
+                                minHeight: '48px',
+                                borderRadius: '10px',
+                                fontWeight: '600',
+                                textTransform: 'none',
+                            }}
                         >
                             {loading ? (
                                 <CircularProgress size={24} color="inherit" />
@@ -215,13 +264,21 @@ const ForgotPassword: React.FC = () => {
                         <Link
                             component="button"
                             type="button"
-                            onClick={() => navigate('/login')}
-                            className="back-link"
-                            disabled={loading}
-                            sx={{ textDecoration: 'none' }}
+                            onClick={() =>
+                                step === 2 ? setStep(1) : navigate('/login')
+                            }
+                            sx={{
+                                textDecoration: 'none',
+                                color: 'text.secondary',
+                                textAlign: 'center',
+                                fontSize: '0.9rem',
+                                cursor: 'pointer',
+                            }}
                         >
-                            <i className="bi bi-arrow-left me-1"></i> Orqaga
-                            qaytish
+                            <i className="bi bi-arrow-left me-1"></i>
+                            {step === 2
+                                ? "Username-ni o'zgartirish"
+                                : 'Orqaga qaytish'}
                         </Link>
                     </Box>
                 </form>

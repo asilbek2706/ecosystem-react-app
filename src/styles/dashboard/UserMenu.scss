@@ -1,89 +1,113 @@
+$primary: #3b82f6;
+$text-dark: #1e293b;
+$text-muted: #64748b;
+$transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
 .navbar-actions {
     display: flex;
     align-items: center;
     gap: 20px;
 
-    @media (max-width: 576px) {
-        gap: 10px;
-    }
-
+    // Bildirishnoma tugmasi
     .action-btn {
-        background: #f1f6ff;
-        border-radius: 10px;
-        min-width: 40px;
-        height: 40px;
-        padding: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        i {
-            font-size: 20px;
-            color: #1f6feb;
-        }
+        background: #f1f5f9;
+        color: $text-dark;
+        width: 42px;
+        height: 42px;
+        transition: $transition;
 
         &:hover {
-            background: #e1edff;
+            background: #e2e8f0;
+            transform: translateY(-2px);
         }
 
-        @media (max-width: 576px) {
-            background: transparent; // Mobilda minimalist ko'rinish
+        i {
+            font-size: 1.2rem;
+        }
+    }
 
-            i {
-                font-size: 18px;
+    // Foydalanuvchi profil bloki
+    .user-account {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 6px 14px;
+        border-radius: 50px; // Pill shape
+        background: rgba(241, 245, 249, 0.5);
+        border: 1px solid transparent;
+        transition: $transition;
+
+        &:hover {
+            background: #ffffff;
+            border-color: #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .user-info {
+            text-align: right;
+            @media (max-width: 600px) {
+                display: none;
+            }
+
+            .name {
+                font-size: 0.95rem;
+                font-weight: 700;
+                color: $text-dark;
+                line-height: 1.2;
+            }
+
+            .role {
+                font-size: 0.75rem;
+                font-weight: 600;
+                color: $text-muted;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+        }
+
+        .avatar-wrapper {
+            position: relative;
+
+            .user-avatar {
+                width: 40px;
+                height: 40px;
+                border: 2px solid #fff;
+                box-shadow: 0 0 0 1px #e2e8f0;
+                font-weight: 700;
+                transition: $transition;
             }
         }
     }
 }
 
-.user-account {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    padding: 5px;
-    border-radius: 12px;
-    transition: background 0.2s;
+// Menu qismi uchun global overrides
+.user-menu-paper {
+    border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1) !important;
+    margin-top: 12px !important;
 
-    &:hover {
-        background: rgba(0, 0, 0, 0.02);
-    }
-}
+    .MuiMenuItem-root {
+        margin: 4px 8px;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        color: $text-dark;
+        transition: 0.2s;
 
-.user-info {
-    text-align: right;
+        &:hover {
+            background: #f8fafc;
+            color: $primary;
 
-    .name {
-        font-weight: 600;
-        font-size: 14px;
-        color: #333;
-        display: block;
-        line-height: 1.2;
-    }
+            .MuiListItemIcon-root {
+                color: $primary;
+            }
+        }
 
-    .role {
-        font-size: 12px;
-        color: gray;
-        display: block;
-    }
-
-    @media (max-width: 768px) {
-        display: none; // Planshet va mobilda ism-familiyani yashiramiz
-    }
-}
-
-.user-avatar {
-    width: 40px !important;
-    height: 40px !important;
-    border: 2px solid #1f6feb;
-    transition: transform 0.2s;
-
-    &:active {
-        transform: scale(0.95);
-    }
-
-    @media (max-width: 576px) {
-        width: 36px !important;
-        height: 36px !important;
+        &.logout-item {
+            color: #ef4444;
+            &:hover {
+                background: #fef2f2;
+            }
+        }
     }
 }

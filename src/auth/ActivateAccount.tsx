@@ -135,7 +135,7 @@ const ActivateAccount: FC = () => {
                                 fullWidth
                                 value={username}
                                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                                    setUsername(e.target.value)
+                                    setUsername(e.target.value.toUpperCase())
                                 }
                                 required
                                 disabled={loading}
@@ -145,6 +145,7 @@ const ActivateAccount: FC = () => {
                                             <i className="bi bi-person text-secondary"></i>
                                         </InputAdornment>
                                     ),
+                                    style: { textTransform: 'uppercase' },
                                 }}
                             />
                         ) : (
