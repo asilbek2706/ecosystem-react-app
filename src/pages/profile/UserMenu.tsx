@@ -1,4 +1,4 @@
-import { type FC, memo, type MouseEvent, useState } from 'react';
+import { type FC, memo, type MouseEvent, useState, useMemo } from 'react';
 import {
     Avatar,
     Badge,
@@ -9,11 +9,21 @@ import {
     Typography,
     Box,
     CircularProgress,
+    Tooltip,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { LogoutService } from '../../services/logout.service.ts'; // Alohida service
+import {
+    PersonOutline,
+    LogoutOutlined,
+    NotificationsNoneOutlined,
+} from '@mui/icons-material';
+
+import { LogoutService } from '../../services/logout.service.ts';
 import type { IUserProfile } from '../../types/auth.types.ts';
 import '../../styles/dashboard/UserMenu.scss';
+
+// Backend URL ni o'zingiznikiga almashtiring
+const API_URL = import.meta.env.VITE_API_URL || 'https://api.ecosystem.uz';
 
 interface UserMenuProps {
     user: IUserProfile | null;
@@ -24,67 +34,74 @@ const UserMenu: FC<UserMenuProps> = memo(({ user }) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
 
+    // --- Rasm mantiqini to'g'irlash (Master Logic) ---
+    const avatarSrc = useMemo(() => {
+        if (!user) return undefined;
+
+        // Backenddan qaysi nomda kelsa ham ushlab olamiz
+        const rawPath = user.avatar || user.profile_image_url;
+
+        if (
+            !rawPath ||
+            rawPath === 'Not set' ||
+            rawPath.includes('default-avatar')
+        ) {
+            return undefined;
+        }
+
+        // Agar path to'liq URL bo'lmasa, API_URL ni qo'shamiz
+        if (rawPath.startsWith('http')) {
+            return rawPath;
+        }
+
+        // Relative path bo'lsa (masalan: /media/avatars/user.jpg)
+        return `${API_URL}${rawPath.startsWith('/') ? '' : '/'}${rawPath}`;
+    }, [user]);
+
     const handleOpenMenu = (event: MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
     };
 
-    const handleCloseMenu = () => {
-        setAnchorEl(null);
-    };
-
-    const handleProfileClick = () => {
-        handleCloseMenu();
-        navigate('/dashboard/profile');
-    };
+    const handleCloseMenu = () => setAnchorEl(null);
 
     const handleLogout = async () => {
         handleCloseMenu();
-        setIsLoggingOut(true); // Yuklanish holatini yoqish
-
+        setIsLoggingOut(true);
         try {
-            // Server-side logoutni chaqiramiz
             await LogoutService.handleLogout();
         } catch (error) {
-            console.error('Logout process error:', error);
+            console.error('Logout error:', error);
         } finally {
             setIsLoggingOut(false);
-            // Har qanday holatda foydalanuvchini login sahifasiga yo'naltiramiz
             navigate('/login', { replace: true });
         }
     };
 
-    const getAvatarImage = () => {
-        if (!user || user.profile_image_url === 'Not set') return undefined;
-        return user.profile_image_url;
-    };
-
-    const getDepartmentName = () => {
-        if (user?.member_departments && user.member_departments.length > 0) {
+    const displayRole = () => {
+        if (user?.member_departments?.length)
             return user.member_departments[0].name;
-        }
-
-        // Rollarni chiroyliroq ko'rsatish mantiqi
         const roles: Record<string, string> = {
             dev: 'Dasturchi',
             superadmin: 'Admin',
             manager: 'Manager',
         };
-
-        return roles[user?.role || ''] || user?.role || 'Foydalanuvchi';
+        return roles[user?.role || ''] || 'Foydalanuvchi';
     };
 
     return (
         <div className="navbar-actions">
-            <IconButton className="action-btn">
-                <Badge color="error">
-                    <i className="bi bi-bell"></i>
-                </Badge>
-            </IconButton>
+            <Tooltip title="Bildirishnomalar">
+                <IconButton className="action-btn">
+                    <Badge color="error" variant="dot">
+                        <NotificationsNoneOutlined />
+                    </Badge>
+                </IconButton>
+            </Tooltip>
 
             <div
                 className="user-account"
                 onClick={handleOpenMenu}
-                style={{ cursor: isLoggingOut ? 'not-allowed' : 'pointer' }}
+                style={{ cursor: isLoggingOut ? 'wait' : 'pointer' }}
             >
                 <div className="user-info">
                     <Typography className="name">
@@ -92,25 +109,30 @@ const UserMenu: FC<UserMenuProps> = memo(({ user }) => {
                             ? `${user.first_name} ${user.last_name}`
                             : 'Yuklanmoqda...'}
                     </Typography>
-                    <Typography className="role">
-                        {getDepartmentName()}
-                    </Typography>
+                    <Typography className="role">{displayRole()}</Typography>
                 </div>
-                <Box sx={{ position: 'relative' }}>
+
+                <Box className="avatar-wrapper">
                     <Avatar
                         className="user-avatar"
-                        sx={{ bgcolor: 'primary.main' }}
-                        src={getAvatarImage()}
+                        src={avatarSrc}
+                        sx={{
+                            bgcolor: 'primary.main',
+                            transition: '0.3s',
+                            opacity: isLoggingOut ? 0.5 : 1,
+                        }}
                     >
                         {user?.first_name?.charAt(0) || 'U'}
                     </Avatar>
+
                     {isLoggingOut && (
                         <CircularProgress
-                            size={40}
+                            size={44}
+                            thickness={2}
                             sx={{
                                 position: 'absolute',
-                                top: 0,
-                                left: 0,
+                                top: -2,
+                                left: -2,
                                 zIndex: 1,
                             }}
                         />
@@ -124,40 +146,45 @@ const UserMenu: FC<UserMenuProps> = memo(({ user }) => {
                 onClose={handleCloseMenu}
                 transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                 anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-                sx={{ mt: 1.5 }}
-                PaperProps={{
-                    sx: {
-                        borderRadius: '12px',
-                        minWidth: '200px',
-                        boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-                    },
-                }}
+                className="user-menu-root"
+                PaperProps={{ className: 'user-menu-paper' }}
+                disableScrollLock
             >
-                <MenuItem onClick={handleProfileClick} sx={{ py: 1.2 }}>
+                <Box
+                    sx={{
+                        px: 2,
+                        py: 1,
+                        borderBottom: '1px solid #f1f5f9',
+                        mb: 1,
+                    }}
+                >
+                    <Typography variant="caption" color="text.secondary">
+                        Tizimga kirilgan:
+                    </Typography>
+                    <Typography variant="body2" fontWeight={700}>
+                        {user?.email}
+                    </Typography>
+                </Box>
+
+                <MenuItem
+                    onClick={() => {
+                        handleCloseMenu();
+                        navigate('/dashboard/profile');
+                    }}
+                >
                     <ListItemIcon>
-                        <i className="bi bi-person"></i>
+                        <PersonOutline fontSize="small" />
                     </ListItemIcon>
                     Profil
                 </MenuItem>
 
-                <div
-                    style={{
-                        height: '1px',
-                        backgroundColor: '#eee',
-                        margin: '8px 0',
-                    }}
-                />
-
                 <MenuItem
                     onClick={handleLogout}
                     disabled={isLoggingOut}
-                    sx={{ color: '#d32f2f', py: 1.2 }}
+                    className="logout-item"
                 >
                     <ListItemIcon>
-                        <i
-                            className="bi bi-box-arrow-right"
-                            style={{ color: '#d32f2f' }}
-                        ></i>
+                        <LogoutOutlined fontSize="small" color="error" />
                     </ListItemIcon>
                     Chiqish
                 </MenuItem>
