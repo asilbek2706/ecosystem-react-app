@@ -1,314 +1,182 @@
-import { type ChangeEvent, type FC, type FormEvent, useState } from 'react';
+import { type FC, useState } from 'react';
 import {
     Box,
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Grid,
-    Paper,
-    TextField,
     Typography,
+    Tabs,
+    Tab,
+    Avatar,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    TextField,
+    DialogActions,
+    Button,
 } from '@mui/material';
-import { useNavigate, useOutletContext } from 'react-router-dom';
-import { toast, Toaster } from 'react-hot-toast';
-import {
-    type IUpdateProfileData,
-    ProfileService,
-} from '../../services/profile.service.ts';
-import { EmailService } from '../../services/email.service.ts';
-import {
-    type IChangePasswordData,
-    PasswordService,
-} from '../../services/password.service.ts';
-import { AuthService } from '../../services/auth.service.ts';
-import type { IApiError, IUserProfile } from '../../types/auth.types.ts';
+import { useOutletContext } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+import { Person, Lock, PhotoCamera } from '@mui/icons-material';
 
-interface ContextType {
-    user: IUserProfile | null;
-    refreshProfile: () => Promise<void>;
-}
+// Hooks & Logic
+import { useProfileLogic } from '../../hooks/useProfileLogic';
+import { usePasswordLogic } from '../../hooks/usePasswordLogic';
+
+// Components
+import { GeneralSettings } from '../../components/Profile/GeneralSettings.tsx';
+import { PasswordSettings } from '../../components/Profile/PasswordSettings.tsx';
+
+// Styles & Types
+import '../../styles/profile/ProfileSettings.scss';
+import type { ProfileContextType } from '../../types/profile';
 
 const ProfileSettings: FC = () => {
-    const { user, refreshProfile } = useOutletContext<ContextType>();
-    const navigate = useNavigate();
+    // 1. Context dan ma'lumotlarni olish
+    const { user, refreshProfile } = useOutletContext<ProfileContextType>();
 
-    // --- State-lar ---
-    const [loading, setLoading] = useState<boolean>(false);
-    const [verifying, setVerifying] = useState<boolean>(false);
-    const [isVerifyModalOpen, setIsVerifyModalOpen] = useState<boolean>(false);
-    const [verificationCode, setVerificationCode] = useState<string>('');
+    // 2. Tab holati
+    const [activeTab, setActiveTab] = useState<number>(0);
 
-    const [formData, setFormData] = useState<IUpdateProfileData>({
-        first_name: user?.first_name || '',
-        last_name: user?.last_name || '',
-        email: user?.email || '',
-        phone_number: user?.phone_number || '',
-        telegram_id: user?.telegram_id || '',
-    });
-
-    const [passwordData, setPasswordData] = useState<IChangePasswordData>({
-        old_password: '',
-        new_password: '',
-        confirm_password: '',
-    });
-
-    const handleFormChange = (e: ChangeEvent<HTMLInputElement>): void => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-    const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>): void => {
-        setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
-    };
-
-    const handleProfileSubmit = async (e: FormEvent): Promise<void> => {
-        e.preventDefault();
-        const toastId = toast.loading("O'zgarishlar saqlanmoqda...");
-        setLoading(true);
-
-        try {
-            await ProfileService.updateProfile(formData);
-            if (formData.email !== user?.email) {
-                toast.success(
-                    'Profil yangilandi. Yangi emailga tasdiqlash kodi yuborildi!',
-                    { id: toastId }
-                );
-                setIsVerifyModalOpen(true);
-            } else {
-                toast.success('Ma’lumotlar muvaffaqiyatli yangilandi!', {
-                    id: toastId,
-                });
-            }
-            await refreshProfile();
-        } catch (error: unknown) {
-            const apiError = error as IApiError;
-            toast.error(
-                apiError.response?.data?.message || 'Xatolik yuz berdi',
-                { id: toastId }
-            );
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handlePasswordSubmit = async (e: FormEvent): Promise<void> => {
-        e.preventDefault();
-        if (passwordData.new_password !== passwordData.confirm_password) {
-            toast.error('Yangi parollar mos kelmadi!');
-            return;
-        }
-
-        const tId = toast.loading('Parol yangilanmoqda...');
-        try {
-            await PasswordService.changePassword(passwordData);
-            toast.success(
-                "Parol muvaffaqiyatli o'zgartirildi! Qayta login qiling.",
-                { id: tId }
-            );
-
-            setTimeout(() => {
-                AuthService.logout();
-                navigate('/login', { replace: true });
-            }, 2000);
-        } catch (error: unknown) {
-            const apiError = error as IApiError;
-            toast.error(
-                apiError.response?.data?.message || "Eski parol noto'g'ri",
-                { id: tId }
-            );
-        }
-    };
-
-    const handleVerifyEmail = async (): Promise<void> => {
-        if (!verificationCode) return;
-        setVerifying(true);
-        const tId = toast.loading('Kod tekshirilmoqda...');
-
-        try {
-            await EmailService.verifyNewEmail({ code: verificationCode });
-            toast.success('Email muvaffaqiyatli tasdiqlandi!', { id: tId });
-            setIsVerifyModalOpen(false);
-            setVerificationCode('');
-            await refreshProfile();
-        } catch (error: unknown) {
-            const apiError = error as IApiError;
-            toast.error(apiError.response?.data?.message || 'Kod noto‘g‘ri!', {
-                id: tId,
-            });
-        } finally {
-            setVerifying(false);
-        }
-    };
+    // 3. Biznes mantiq (Hooks)
+    const profileLogic = useProfileLogic(user, refreshProfile);
+    const passwordLogic = usePasswordLogic();
 
     return (
-        <Box sx={{ p: 3 }}>
-            <Toaster position="top-center" />
-            <Typography variant="h4" sx={{ mb: 3, fontWeight: 700 }}>
-                Sozlamalar
-            </Typography>
+        <Box className="profile-page-wrapper fade-in">
+            <Toaster position="top-right" reverseOrder={false} />
 
-            <Paper
-                sx={{
-                    p: 4,
-                    borderRadius: '16px',
-                    mb: 4,
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-                }}
-            >
-                <Typography variant="h6" sx={{ mb: 3 }}>
-                    Shaxsiy ma'lumotlar
-                </Typography>
-                <form onSubmit={handleProfileSubmit}>
-                    <Grid container spacing={3}>
-                        <Grid size={{ xs: 12, sm: 6 }}>
-                            <TextField
-                                fullWidth
-                                label="Ism"
-                                name="first_name"
-                                value={formData.first_name}
-                                onChange={handleFormChange}
-                            />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6 }}>
-                            <TextField
-                                fullWidth
-                                label="Familiya"
-                                name="last_name"
-                                value={formData.last_name}
-                                onChange={handleFormChange}
-                            />
-                        </Grid>
-                        <Grid size={{ xs: 12 }}>
-                            <TextField
-                                fullWidth
-                                label="Email"
-                                name="email"
-                                value={formData.email}
-                                onChange={handleFormChange}
-                            />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6 }}>
-                            <TextField
-                                fullWidth
-                                label="Telefon"
-                                name="phone_number"
-                                value={formData.phone_number}
-                                onChange={handleFormChange}
-                            />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6 }}>
-                            <TextField
-                                fullWidth
-                                label="Telegram ID"
-                                name="telegram_id"
-                                value={formData.telegram_id}
-                                onChange={handleFormChange}
-                            />
-                        </Grid>
-                        <Grid size={{ xs: 12 }}>
-                            <Button
-                                type="submit"
-                                variant="contained"
-                                disabled={loading}
-                                sx={{ py: 1.2, px: 4, borderRadius: '8px' }}
+            <Box className="glass-card">
+                {/* --- Sidebar Section --- */}
+                <Box className="sidebar">
+                    <Box className="profile-preview">
+                        <div className="avatar-container">
+                            <Avatar
+                                src={user?.profile_image_url || ''}
+                                className="main-avatar"
+                                sx={{
+                                    bgcolor: user?.avatar
+                                        ? 'transparent'
+                                        : '#3b82f6',
+                                }}
                             >
-                                Profilni saqlash
-                            </Button>
-                        </Grid>
-                    </Grid>
-                </form>
-            </Paper>
+                                {!user?.avatar && user?.first_name?.[0]}
+                            </Avatar>
+                            <label className="camera-overlay">
+                                <PhotoCamera fontSize="small" />
+                                <input
+                                    type="file"
+                                    hidden
+                                    accept="image/*"
+                                    onChange={(e) =>
+                                        console.log(e.target.files?.[0])
+                                    } // Keyinchalik upload mantiqi qo'shiladi
+                                />
+                            </label>
+                        </div>
+                        <Typography variant="h6" fontWeight={700} noWrap>
+                            {user?.first_name} {user?.last_name}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                            ID: {user?.id || 'Noma’lum'}
+                        </Typography>
+                    </Box>
 
-            {/* 2. Parolni o'zgartirish */}
-            <Paper
-                sx={{
-                    p: 4,
-                    borderRadius: '16px',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-                }}
-            >
-                <Typography variant="h6" sx={{ mb: 3 }}>
-                    Xavfsizlik (Parol)
-                </Typography>
-                <form onSubmit={handlePasswordSubmit}>
-                    <Grid container spacing={3}>
-                        <Grid size={{ xs: 12 }}>
-                            <TextField
-                                fullWidth
-                                type="password"
-                                label="Eski parol"
-                                name="old_password"
-                                value={passwordData.old_password}
-                                onChange={handlePasswordChange}
-                                required
-                            />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6 }}>
-                            <TextField
-                                fullWidth
-                                type="password"
-                                label="Yangi parol"
-                                name="new_password"
-                                value={passwordData.new_password}
-                                onChange={handlePasswordChange}
-                                required
-                            />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6 }}>
-                            <TextField
-                                fullWidth
-                                type="password"
-                                label="Yangi parolni tasdiqlang"
-                                name="confirm_password"
-                                value={passwordData.confirm_password}
-                                onChange={handlePasswordChange}
-                                required
-                            />
-                        </Grid>
-                        <Grid size={{ xs: 12 }}>
-                            <Button
-                                type="submit"
-                                variant="contained"
-                                color="warning"
-                                sx={{ py: 1.2, px: 4, borderRadius: '8px' }}
-                            >
-                                Parolni yangilash
-                            </Button>
-                        </Grid>
-                    </Grid>
-                </form>
-            </Paper>
+                    <Tabs
+                        orientation="vertical"
+                        value={activeTab}
+                        onChange={(_, v) => setActiveTab(v)}
+                        className="settings-tabs"
+                        sx={{ '& .MuiTabs-indicator': { display: 'none' } }}
+                    >
+                        <Tab
+                            icon={<Person fontSize="small" />}
+                            iconPosition="start"
+                            label="Profil ma'lumotlari"
+                        />
+                        <Tab
+                            icon={<Lock fontSize="small" />}
+                            iconPosition="start"
+                            label="Xavfsizlik & Parol"
+                        />
+                    </Tabs>
+                </Box>
 
-            {/* Email Verify Modali */}
+                {/* --- Content Area Section --- */}
+                <Box className="content">
+                    {activeTab === 0 ? (
+                        <GeneralSettings
+                            formData={profileLogic.formData}
+                            onChange={profileLogic.handleFormChange}
+                            onSubmit={profileLogic.handleProfileSubmit}
+                            loading={profileLogic.loading}
+                        />
+                    ) : (
+                        <PasswordSettings
+                            formData={passwordLogic.passwordData}
+                            onChange={passwordLogic.handlePasswordChange}
+                            onSubmit={passwordLogic.handlePasswordSubmit}
+                            loading={passwordLogic.loading}
+                        />
+                    )}
+                </Box>
+            </Box>
+
+            {/* --- OTP Verification Modal --- */}
             <Dialog
-                open={isVerifyModalOpen}
-                onClose={() => !verifying && setIsVerifyModalOpen(false)}
+                open={profileLogic.isVerifyModalOpen}
+                onClose={() => profileLogic.setIsVerifyModalOpen(false)}
+                slotProps={{
+                    paper: {
+                        className: 'otp-dialog',
+                        sx: { borderRadius: '24px' },
+                    },
+                }}
             >
-                <DialogTitle>Emailni tasdiqlash</DialogTitle>
+                <DialogTitle
+                    sx={{ fontWeight: 800, textAlign: 'center', pt: 3 }}
+                >
+                    Emailni tasdiqlash
+                </DialogTitle>
                 <DialogContent>
-                    <Typography sx={{ mb: 2 }}>
-                        Yangi emailingizga yuborilgan 6 xonali kodni kiriting:
+                    <Typography
+                        variant="body2"
+                        sx={{
+                            mb: 3,
+                            color: 'text.secondary',
+                            textAlign: 'center',
+                        }}
+                    >
+                        Xavfsizlikni ta'minlash uchun emailingizga yuborilgan 6
+                        xonali kodni kiriting.
                     </Typography>
                     <TextField
                         fullWidth
-                        label="Tasdiqlash kodi"
-                        value={verificationCode}
-                        onChange={(e) => setVerificationCode(e.target.value)}
-                        slotProps={{ htmlInput: { maxLength: 6 } }}
+                        autoFocus
+                        placeholder="000000"
+                        variant="outlined"
+                        slotProps={{
+                            htmlInput: {
+                                maxLength: 6,
+                                style: {
+                                    textAlign: 'center',
+                                    letterSpacing: '12px',
+                                    fontSize: '1.8rem',
+                                    fontWeight: 900,
+                                    color: '#3b82f6',
+                                },
+                            },
+                        }}
                     />
                 </DialogContent>
-                <DialogActions sx={{ p: 2 }}>
+                <DialogActions sx={{ p: 3, justifyContent: 'center', gap: 2 }}>
                     <Button
-                        onClick={() => setIsVerifyModalOpen(false)}
-                        disabled={verifying}
+                        onClick={() => profileLogic.setIsVerifyModalOpen(false)}
+                        sx={{ color: 'text.secondary', fontWeight: 600 }}
                     >
                         Bekor qilish
                     </Button>
                     <Button
-                        onClick={handleVerifyEmail}
                         variant="contained"
-                        disabled={verifying || verificationCode.length < 1}
+                        className="submit-btn"
+                        sx={{ m: '0 !important', px: 4 }}
                     >
                         Tasdiqlash
                     </Button>
