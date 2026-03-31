@@ -1,0 +1,140 @@
+$primary: #0f4c81;
+$bg-soft: #f8fafc;
+$transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+.dashboard-home {
+    padding: 32px;
+
+    .loading-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 60vh;
+    }
+
+    .welcome-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px;
+
+        .greeting {
+            font-weight: 800;
+            letter-spacing: -1px;
+            color: #0f172a;
+        }
+
+        .sub-text {
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .action-button {
+            background: #0f4c81;
+            border-radius: 12px;
+            text-transform: none;
+            font-weight: 600;
+            padding: 10px 24px;
+            box-shadow: 0 4px 12px rgba(15, 76, 129, 0.2);
+        }
+    }
+
+    .dept-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 22px;
+        padding: 24px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+
+        &:hover {
+            transform: translateY(-6px);
+            border-color: #0f4c81;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+
+            .dept-icon {
+                background: #0f4c81;
+                color: white;
+            }
+        }
+
+        .dept-header {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+
+            .dept-icon {
+                width: 54px;
+                height: 54px;
+                background: #f1f5f9;
+                color: #0f4c81;
+                border-radius: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+            }
+
+            .title-wrapper {
+                .dept-title {
+                    font-weight: 700;
+                    font-size: 1.15rem;
+                    color: #1e293b;
+                }
+                .dept-code {
+                    font-size: 0.85rem;
+                    color: #0f4c81;
+                    font-weight: 600;
+                    letter-spacing: 0.5px;
+                }
+            }
+        }
+
+        .dept-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding-top: 18px;
+            border-top: 1px dashed #e2e8f0;
+
+            .label {
+                font-size: 0.7rem;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: #94a3b8;
+                font-weight: 700;
+                margin-bottom: 6px;
+            }
+
+            .value {
+                font-weight: 700;
+                color: #334155;
+            }
+
+            .status-chip {
+                font-weight: 700;
+                border-radius: 8px;
+
+                &.active {
+                    background: rgba(34, 197, 94, 0.1);
+                    color: #16a34a;
+                }
+                &.inactive {
+                    background: #f1f5f9;
+                    color: #64748b;
+                }
+            }
+        }
+    }
+
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        padding: 100px 0;
+        color: #94a3b8;
+    }
+}
