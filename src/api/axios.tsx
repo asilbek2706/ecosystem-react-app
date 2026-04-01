@@ -24,14 +24,22 @@ api.interceptors.request.use(
             ? publicUrls.some((url) => config.url!.endsWith(url))
             : false;
 
-        // Agar token bo'lsa va so'rov ochiq URL bo'lmasa, header qo'shamiz
         if (token && !isPublic) {
             config.headers.Authorization = `Bearer ${token}`;
         }
 
         return config;
     },
+    (error) => Promise.reject(error)
+);
+
+api.interceptors.response.use(
+    (response) => response,
     (error) => {
+        if (error.response?.status === 401) {
+            localStorage.removeItem('accessToken');
+            window.location.href = '/login';
+        }
         return Promise.reject(error);
     }
 );
