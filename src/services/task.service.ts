@@ -1,5 +1,5 @@
 import api from '../api/axios';
-import type { ITask, ITaskListResponse } from '../types/task.type.ts';
+import { ITaskListResponse, ITaskDetailResponse } from '../types/task.type';
 
 export const TaskService = {
     getTasksByDepartment: async (deptCode: string) => {
@@ -9,6 +9,17 @@ export const TaskService = {
     },
 
     getTaskDetail: async (id: string) => {
-        return await api.get<ITask>(`/tasks/detail/${id}/`);
+        return await api.get<ITaskDetailResponse>(`/tasks/detail/${id}/`);
+    },
+
+    createTask: async (payload: {
+        title: string;
+        description: string;
+        department_code: string;
+        priority: string;
+        status: string;
+        deadline: string | null;
+    }) => {
+        return await api.post('/tasks/list/', payload);
     },
 };

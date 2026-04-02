@@ -11,9 +11,9 @@ import { ArrowRightCircle, InfoCircle } from 'react-bootstrap-icons';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-import { DepartmentService } from '../../services/department.service';
+import { DepartmentService } from '@/services/department.service';
 import '../../styles/dashboard/DashboardHome.scss';
-import type { IDepartment } from '../../types/department.type.ts';
+import type { IDepartment } from '@/types/department.type.ts';
 import DepartmentCard from './department/DepartmentCard.tsx';
 
 const DashboardHome: FC = () => {

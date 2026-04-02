@@ -138,7 +138,6 @@ const DashboardLayout: FC = () => {
                 </header>
 
                 <main className="content-body">
-                    {/* Outlet context endi aniq DashboardContextType ga ega */}
                     <Outlet
                         context={
                             {

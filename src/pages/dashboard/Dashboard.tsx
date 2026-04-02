@@ -3,12 +3,12 @@ import { Box, Typography, CircularProgress, IconButton } from '@mui/material';
 import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { Menu as MenuIcon, Close as CloseIcon } from '@mui/icons-material';
 
-import { AuthService } from '../../services/auth.service.ts';
-import type { IUserProfile } from '../../types/auth.types.ts';
+import { AuthService } from '@/services/auth.service.ts';
+import type { IUserProfile } from '@/types/auth.types.ts';
 import UserMenu from '../profile/UserMenu.tsx';
 
 // Styles
-import '../../styles/dashboard/Dashboard.scss';
+import '@/styles/dashboard/Dashboard.scss';
 import type { DashboardContextType } from './DashboardLayout.tsx';
 
 const Dashboard: FC = () => {
@@ -49,7 +49,6 @@ const Dashboard: FC = () => {
         setIsMenuOpen(false);
     };
 
-    // Performance uchun contextni memoize qilish
     const contextValue = useMemo(
         () => ({ user, refreshProfile }),
         [user, refreshProfile]
@@ -173,7 +172,6 @@ const Dashboard: FC = () => {
     );
 };
 
-// --- Sub-component for Nav Items ---
 interface NavItemProps {
     label: string;
     icon: string;

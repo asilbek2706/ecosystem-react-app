@@ -34,20 +34,17 @@ const TaskDetail: FC = () => {
         if (!id) return;
         try {
             setLoading(true);
-            setError(null);
-
             const response = await api.get<ITaskDetailResponse>(
                 `/tasks/detail/${id}/`
             );
 
+            // Bu yerda response.data bu ITaskDetailResponse
+            // response.data.data esa ITask obyektining o'zi
             if (response.data?.status && response.data?.data) {
                 setTask(response.data.data);
-            } else {
-                setError("Vazifa ma'lumotlari noto'g'ri formatda keldi");
             }
         } catch (err) {
-            setError("Vazifa ma'lumotlarini yuklashda xatolik yuz berdi");
-            console.error('Fetch detail error:', err);
+            setError('Vazifa yuklashda xatolik');
         } finally {
             setLoading(false);
         }

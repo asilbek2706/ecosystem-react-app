@@ -12,6 +12,17 @@ export interface ITask {
     created_at: string;
 }
 
+export interface ITaskListResponse {
+    status: boolean;
+    statusCode: number;
+    message: string;
+    data: {
+        tasks: ITask[];
+    };
+    total_tasks: number;
+    timestamp: string;
+}
+
 export interface ITaskDetailResponse {
     status: boolean;
     statusCode: number;

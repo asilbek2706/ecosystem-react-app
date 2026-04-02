@@ -1,6 +1,6 @@
 import { Box, Typography, Chip, Grid } from '@mui/material';
 import { Building, People } from 'react-bootstrap-icons';
-import type { IDepartment } from '../../../types/department.type.ts';
+import type { IDepartment } from '@/types/department.type.ts';
 import type { FC } from 'react';
 
 interface Props {
