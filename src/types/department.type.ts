@@ -9,16 +9,16 @@ export interface IDepartment {
         first_name?: string;
         last_name?: string;
     };
-    members_count: number;
+    members_count: string;
 }
 
 export interface IDepartmentListResponse {
-    status: boolean;
-    statusCode: number;
-    message: string;
-    data: {
-        departments: IDepartment[];
+    status?: boolean;
+    statusCode?: number;
+    message?: string;
+    data?: {
+        departments?: IDepartment[];
     };
-    total_department_count: number;
-    timestamp: string;
+    total_department_count?: number;
+    timestamp?: string;
 }

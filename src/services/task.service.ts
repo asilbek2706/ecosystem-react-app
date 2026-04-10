@@ -28,6 +28,10 @@ export const TaskService = {
         });
     },
 
+    getAllTasks: () => {
+        return api.get<ITaskListResponse>(`/tasks/list/`);
+    },
+
     /**
      * Alohida bitta vazifa tafsilotlarini olish.
      */

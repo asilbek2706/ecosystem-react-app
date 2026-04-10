@@ -16,27 +16,27 @@ export interface ITask {
     department_code: string;
     status: TaskStatus;
     priority: TaskPriority;
-    created_by: ITaskCreator;
+    created_by: string | ITaskCreator;
     deadline: string | null;
     created_at: string;
 }
 
 export interface StatusStyle {
     color: 'warning' | 'success' | 'info' | 'secondary' | 'default';
-    icon: ReactElement; // TS2769 xatosini yo'qotish uchun ReactElement ishlatiladi
+    icon: ReactElement;
     label: string;
 }
 
 export interface ITaskListResponse {
-    status: boolean;
-    data: {
-        tasks: ITask[];
+    status?: boolean;
+    data?: {
+        tasks?: ITask[];
     };
-    message: string;
+    message?: string;
 }
 
 export interface ITaskDetailResponse {
-    status: boolean;
-    data: ITask;
-    message: string;
+    status?: boolean;
+    data?: ITask;
+    message?: string;
 }

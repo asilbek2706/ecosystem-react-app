@@ -26,6 +26,7 @@ import type {
     TaskStatus,
 } from '@/types/task.type.ts';
 import { TaskService } from '@/services/task.service.ts';
+import { normalizeTaskList } from '@/utils/api-normalizers.ts';
 
 const DepartmentTasks: FC = () => {
     const { deptCode } = useParams<{ deptCode: string }>();
@@ -41,23 +42,17 @@ const DepartmentTasks: FC = () => {
             setLoading(true);
             setError(null);
 
-            const response = await TaskService.getTasksByDepartment(deptCode);
+            const response = await TaskService.getAllTasks();
+            const allTasks = normalizeTaskList(response.data);
+            const normalizedDepartmentCode = String(deptCode).trim().toLowerCase();
 
-            // Skrinshotingizda response.data.data.tasks massiv ekanligi ko'rindi
-            if (response.data?.status && response.data?.data?.tasks) {
-                const allFetchedTasks = response.data.data.tasks;
-
-                // STRICT FILTER: Millionta departament ichidan faqat hozirgisini ajratish
-                const strictFiltered = allFetchedTasks.filter(
+            setTasks(
+                allTasks.filter(
                     (task) =>
-                        String(task.department_code).trim() ===
-                        String(deptCode).trim()
-                );
-
-                setTasks(strictFiltered);
-            } else {
-                setTasks([]);
-            }
+                        String(task.department_code).trim().toLowerCase() ===
+                        normalizedDepartmentCode
+                )
+            );
         } catch (err) {
             console.error('Task fetch error:', err);
             setError('Ma’lumotlarni yuklashda xatolik yuz berdi');
@@ -99,6 +94,12 @@ const DepartmentTasks: FC = () => {
             low: '#4caf50',
         };
         return colors[priority] || '#757575';
+    };
+
+    const getCreatorName = (task: ITask): string => {
+        return typeof task.created_by === 'string'
+            ? task.created_by
+            : task.created_by?.username || 'Noma`lum';
     };
 
     if (loading)
@@ -235,7 +236,7 @@ const DepartmentTasks: FC = () => {
                                                     variant="caption"
                                                     fontWeight={700}
                                                 >
-                                                    {task.created_by.username}
+                                                    {getCreatorName(task)}
                                                 </Typography>
                                             </Box>
                                             <Typography

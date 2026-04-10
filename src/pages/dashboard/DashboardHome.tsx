@@ -15,6 +15,7 @@ import { DepartmentService } from '@/services/department.service';
 import '../../styles/dashboard/DashboardHome.scss';
 import type { IDepartment } from '@/types/department.type.ts';
 import DepartmentCard from './department/DepartmentCard.tsx';
+import { normalizeDepartmentList } from '@/utils/api-normalizers.ts';
 
 const DashboardHome: FC = () => {
     const navigate = useNavigate();
@@ -27,12 +28,7 @@ const DashboardHome: FC = () => {
             setLoading(true);
             setError(null);
             const response = await DepartmentService.getAllDepartments();
-
-            if (response.data?.status && response.data?.data?.departments) {
-                setDepartments(response.data.data.departments);
-            } else {
-                setDepartments([]);
-            }
+            setDepartments(normalizeDepartmentList(response.data));
         } catch (err: unknown) {
             if (axios.isAxiosError(err)) {
                 setError(

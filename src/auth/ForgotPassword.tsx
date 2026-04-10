@@ -1,4 +1,4 @@
-import React, { type ChangeEvent, type FormEvent, useState } from 'react';
+import { type ChangeEvent, type FormEvent, useState } from 'react';
 import {
     Box,
     TextField,
@@ -22,7 +22,7 @@ interface BackendError {
     message?: string;
 }
 
-const ForgotPassword: React.FC = () => {
+const ForgotPassword = () => {
     const [step, setStep] = useState<number>(1);
     const [username, setUsername] = useState<string>('');
     const [code, setCode] = useState<string>('');

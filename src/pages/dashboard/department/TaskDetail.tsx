@@ -22,6 +22,7 @@ import {
 import type { ITask, TaskStatus, StatusStyle } from '@/types/task.type.ts';
 import { TaskService } from '@/services/task.service.ts';
 import '@/styles/dashboard/department/TaskDetail.scss';
+import { normalizeTaskDetail } from '@/utils/api-normalizers.ts';
 
 const TaskDetail: FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -35,10 +36,7 @@ const TaskDetail: FC = () => {
         try {
             setLoading(true);
             const response = await TaskService.getTaskById(id);
-
-            if (response.data?.status && response.data?.data) {
-                setTask(response.data.data);
-            }
+            setTask(normalizeTaskDetail(response.data));
         } catch (err) {
             console.error(err);
             setError('Vazifa yuklashda xatolik yuz berdi');
@@ -101,6 +99,10 @@ const TaskDetail: FC = () => {
         );
 
     const statusStyle = getStatusStyles(task.status);
+    const creatorName =
+        typeof task.created_by === 'string'
+            ? task.created_by
+            : task.created_by?.username || 'Noma`lum';
 
     return (
         <Box className="task-detail-container" p={3}>
@@ -192,7 +194,7 @@ const TaskDetail: FC = () => {
                         <DetailInfoCard
                             icon={<PersonCircle />}
                             label="Mas'ul shaxs"
-                            value={task.created_by.username}
+                            value={creatorName}
                         />
                     </Grid>
                     <Grid size={{ xs: 12, sm: 6, md: 3 }}>
